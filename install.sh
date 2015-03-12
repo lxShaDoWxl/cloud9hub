@@ -3,8 +3,8 @@
 echo "Installing Cloud9..."
 echo "-----------------------"
 
-git clone https://github.com/ajaxorg/cloud9.git c9
-cd c9
+git clone https://github.com/c9/core.git c9sdk
+cd c9sdk
 npm install
 npm install -g bower
 bower install

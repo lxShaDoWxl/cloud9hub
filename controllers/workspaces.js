@@ -1,4 +1,5 @@
 var fs = require('fs'),
+    fse = require('fs-extra'),
   path = require('path'),
   rimraf = require('rimraf'),
   _ = require('lodash'),
@@ -18,15 +19,27 @@ var createWorkspace = function(params, req, res) {
     return;
   }
 
-  fs.mkdir(__dirname + '/../workspaces/' + req.user + "/" + workspaceName, '0700', function(err) {
+  var workspacePath = __dirname + '/../workspaces/' + req.user + "/" + workspaceName,
+      codeBasePath = __dirname + '/../../code_base/';  
+
+  fs.mkdir(workspacePath, '0700', function(err) {
     if(err) {
       respondInvalidWorkspace(res);
       return;
-    }
+    }    
 
+    fse.copy(codeBasePath, workspacePath, function(err) {
+      console.log('cloning workspace');
+      if (err){
+        console.log(err);
+        respondInvalidWorkspace(res);
+        return;
+      }
+      console.log("workspace cloned");
+    }); 
     res.json({msg: "Workspace " + workspaceName + " was created."});
   });
-}
+};
 
 var createWorkspaceKillTimeout = function(req, workspaceProcess, workspaceName) {
   var timeout = setTimeout(function() {
@@ -59,11 +72,11 @@ exports.list = function(req, res){
       res.json({error: err});
     } else {
       var workspaces = [];
+      console.log(files);
       for(var i=0; i< files.length; i++) {
           // Skip hidden files
           if(files[i][0] === '.') continue;
-
-          workspaces.push({name: files[i]})
+          workspaces.push({name: files[i]});
       }
       res.json({workspaces: workspaces});
     }
@@ -101,21 +114,21 @@ exports.destroy = function(req, res) {
   
     var isPortTaken = function(port, fn) {
       console.log('checking if port', port, 'is taken');
-      var net = require('net')
+      var net = require('net');
       var tester = net.createServer()
       .once('error', function (err) {
-        if (err.code != 'EADDRINUSE') return fn(err)
+        if (err.code != 'EADDRINUSE') return fn(err);
         console.log('port', port, 'seems to be taken');
-        fn(null, true)
+        fn(null, true);
       })
       .once('listening', function() {
         tester.once('close', function() { 
             console.log('port', port, 'seems to be available');
-            fn(null, false) 
+            fn(null, false); 
         })
-        .close()
+        .close();
       })
-      .listen(port)
+      .listen(port);
     };
     
     var getNextAvailablePort = function(callback){
@@ -146,10 +159,12 @@ exports.destroy = function(req, res) {
 
    if(typeof req.app.get('runningWorkspaces')[req.user + '/' + workspaceName] === 'undefined'){
        getNextAvailablePort(function(nextFreePort){
-            console.log("Starting " + __dirname + '/../../c9/bin/cloud9.sh for workspace ' + workspaceName + " on port " + nextFreePort);
+           var c9SdkStartPath =  __dirname + '/../../c9sdk/scripts/start.sh';
+            console.log("Starting " + c9SdkStartPath +' for workspace ' + workspaceName + " on port " + nextFreePort);
        
-            var workspace = spawn(__dirname + '/../../c9/bin/cloud9.sh', ['-w', __dirname + '/../workspaces/' + req.user + '/' + workspaceName, '-l', '0.0.0.0', '-p', nextFreePort], {detached: true});
+            var workspace = spawn(c9SdkStartPath, ['-w', __dirname + '/../workspaces/' + req.user + '/' + workspaceName, '-l', '0.0.0.0', '-p', nextFreePort], {detached: true});
             workspace.stderr.on('data', function (data) {
+                console.log("**********************************");
                 console.log('stdERR: ' + data);
             });
            
@@ -168,7 +183,7 @@ exports.destroy = function(req, res) {
        res.json({msg: "Found running workspace", user: req.user, url: req.app.get('runningWorkspaces')[req.user + '/' + workspaceName].url});
    }
    
- }
+ };
 
 /*
  * POST to keep the workspace alive
@@ -178,4 +193,4 @@ exports.destroy = function(req, res) {
    clearTimeout(workspace.killTimeout);
    workspace.killTimeout = createWorkspaceKillTimeout(req, workspace.process, workspace.name);
    res.send();
- }
+ };
