@@ -1,8 +1,8 @@
 <div class='row dashboard-row'>
     <aside class='col-xs-4 col-sm-3 col-md-3'>
       <p class="centered">
-        <h1 class='bello'>Cloud9Hub</h1>
-        <button class="btn btn-block btn-lg btn-primary" ng-click="blankWorkspace()"><i class='fa fa-plus'></i>&nbsp;Create workspace</button>
+        <h1 class='bello'>CompassAE Cloud9 Manager</h1>
+        <button class="btn btn-block btn-lg btn-primary" ng-click="blankWorkspace()"><i class='fa fa-plus'></i>&nbsp;Clone workspace</button>
       </p>
       <ul class="menu-list">
         <li ng-click="runWorkspace(workspace.name)" ng-repeat="workspace in workspaces" ng-class="{active: currentWorkspace.name == workspace.name}">
@@ -12,30 +12,14 @@
       </ul>
     </aside>
     <div class="col-xs-8 col-sm-9 col-md-9 workspace-wrapper">
-        <section class='no-workspace' ng-show="!currentWorkspace">
-            <div class="block">
-              Welcome to Cloud9Hub.<br/>
-              This part of the screen is the <span class="hint">editor panel.</span><br/>
-              When you run a workspace, it will be started here.
-            </div>
-            <div class="block">
-              On the left you see the <span class="hint">workspace panel</span>.<br/>
-              You can create, delete or run workspaces there.<br/>
-            </div>
-            <div class="block">
-              To <strong>create</strong> a workspace, click the "Create workspace" button.<br/>
-              If you want to run a workspace, click on its name. The workspace will start automatically.<br/>
-              To delete a workspace, click the little "☠" to the right of a workspace item.
-            </div>
-        </section>
-        
         <section class='workspace-details' ng-hide="!currentWorkspace || currentWorkspace.editing">
             <header>
                 <h1 ng-show="currentWorkspace.name === ''">New Workspace</h1>
-                <h1><span ng-hide="!currentWorkspace.user">{{currentWorkspace.user}}&nbsp;/&nbsp;</span>{{currentWorkspace.name}}</h1>
+                <h1><span style="margin-left: 50px;" ng-hide="!currentWorkspace.user">{{currentWorkspace.user}}&nbsp;/&nbsp;</span>{{currentWorkspace.name}}</h1>
             </header>
             <section class="workspace-bar" ng-hide="!currentWorkspace.url">
-                <a ng-click="startEditing()" class="btn btn-success">Start Editing</a>
+                <!-- <a ng-click="startEditing()" class="btn btn-success">Start Editing</a> -->
+                <a ng-click="launchWorkspace()" class="btn btn-success">Launch Workspace</a>
             </section>
             <section class='workspace-form'>
                 <div class="form-group">
@@ -48,10 +32,5 @@
             </section>
         </section>
         
-        <section class='workspace-iframe' ng-hide="!currentWorkspace || !currentWorkspace.editing">
-            <iframe class="workspace" ng-src="{{iframeSrc}}" width="100%" height="100%"></iframe>
-        </section>
-        
-        <div class='loading-overlay' ng-show='loadingWorkspace'><span class='bello'>Loading...</span></div>
     </div>
 </div>

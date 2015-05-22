@@ -19,11 +19,19 @@ var WorkspaceCtrl = function($scope, $http, $timeout, $sce) {
     $scope.iframeSrc = $sce.trustAsResourceUrl($scope.currentWorkspace.url);
   };
 
+  $scope.launchWorkspace = function(){
+    var url = $sce.trustAsResourceUrl($scope.currentWorkspace.url);
+    window.open(url, '_blank');
+    window.focus();
+  };
+
+
   var createWorkspace = function() {
     var wsName = $scope.currentWorkspace.name;
     $scope.loadingWorkspace = true;
     $http.post('/workspace/', {name: wsName})
     .success(function(data) {
+      console.log(data);
       // alert(data.msg);
       $scope.loadingWorkspace = false;
       $scope.workspaces.push({name: wsName});
@@ -47,7 +55,7 @@ var WorkspaceCtrl = function($scope, $http, $timeout, $sce) {
         url: '',
         name: '',
         editing: false
-    }
+    };
   };
 
   $scope.deleteWorkspace = function(name) {
@@ -71,7 +79,7 @@ var WorkspaceCtrl = function($scope, $http, $timeout, $sce) {
       console.log("ERR:", err);
       $scope.currentWorkspace = false;
     });
-  }
+  };
   
   $scope.runWorkspace = function(name) {
     $scope.iframeSrc = '';
@@ -90,5 +98,5 @@ var WorkspaceCtrl = function($scope, $http, $timeout, $sce) {
         alert("Error: " + err);
         console.log(err);
     });
-  }
-}
+  };
+};
