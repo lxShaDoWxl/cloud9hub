@@ -36,7 +36,7 @@ var session = require('express-session');
 var configDB = require('./config/database.js');
 
 // configuration ===============================================================
-mongoose.connect(configDB.url); // connect to our database
+//mongoose.connect(configDB.url); // connect to our database
 
 require('./config/passport')(passport); // pass passport for configuration
 try {
@@ -121,7 +121,20 @@ passport.use('local-login', new LocalStrategy({
             console.log("Username : " + username);
 
             //var newTest = test.replace(/,/g, '-');
+            if(process.env.NODE_ENV === 'development'){
+                username = "viktor";
+                if(!fs.existsSync(__dirname + '/workspaces/' + path.basename(username))) {
+                    //if(config.PERMITTED_USERS !== false && config.PERMITTED_USERS.indexOf(username)) return done('Sorry, not allowed :(', null);
 
+                    //Okay, that is slightly unintuitive: fs.mkdirSync returns "undefined", when successful..
+                    if(fs.mkdirSync(__dirname + '/workspaces/' + path.basename(username), '0700') !== undefined) {
+                        return done("Cannot create user", null);
+                    } else {
+                        return done(null, username);
+                    }
+                }
+                return done(null, username);
+            }
             User.findOne({ 'local.email' :  email }, function(err, user) {
                 // if there are any errors, return the error
                 if (err)
